@@ -6,16 +6,20 @@
 	<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no,width=device-width,minimal-ui">
 	<title>Canvas game</title>
 	<link href="./css/style.css" rel="stylesheet" type="text/css">
-	<script src="./js/game.js"></script>
+	
 		
 </head>
 
 <body>
 <div id="wrapper">
 	<div id="canvas-holder">
-		<canvas id="gameCanvas"></canvas>
+		<img id="background" src="./assets/background.jpg"></img>
+		<canvas id="canvas"></canvas>
 	</div>
 </div>
-
+<script src='js/utils.js'></script>
+<script src='js/FPSMeter.js'></script>
+<script src='js/GameLoopManager.js'></script>
+<script src="./js/game.js"></script>
 </body>
 </html>
