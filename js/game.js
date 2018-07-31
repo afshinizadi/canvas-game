@@ -1,21 +1,20 @@
 
 
-var _gameWidth = window.innerWidth;
+var _gameWidth =window.innerWidth;
 var _gameHeight = window.innerHeight;
 var _marginTop=0;
 var _lineHeight=80;
 var _mainCircleRadius = 50;
-var _headCircleRadius=10;
+var _headCircleRadius=11;
 var _angle=0;
 var throwBallNumber=10;
 
 var gameArea = {
-    canvas : document.getElementById("canvas"),
+    canvas: createHiDPICanvas(_gameWidth, _gameHeight),
     start : function() {
-		this.canvas.width = _gameWidth;
-		this.canvas.height = _gameHeight;
+		this.canvas.id='canvas';
+		document.getElementById('canvas-holder').appendChild(this.canvas);
 		this.context = this.canvas.getContext("2d");
-		//document.body.insertBefore(this.canvas, document.body.childNodes[0]);
 		this.frameNo = 0;
 		GameLoopManager.run(GameTick);
         },
@@ -31,12 +30,10 @@ gameArea.start();
 
 
 
-function draw(){
 
-}
 
-var centerX = gameArea.canvas.width / 2;
-var centerY = gameArea.canvas.height / 2; /*_mainCircleRadius+_marginTop+_lineHeight;*/
+var centerX = _gameWidth / 2;
+var centerY = _gameHeight / 2; /*_mainCircleRadius+_marginTop+_lineHeight;*/
 
 gameArea.context.beginPath();
 gameArea.context.arc(centerX, centerY, _mainCircleRadius, 0, 2 * Math.PI);
@@ -127,8 +124,7 @@ function drawFiveBallAtBelow(){
 			gameArea.context.fill();
 			
 			
-			gameArea.context.lineWidth = 1;
-			gameArea.context.stroke();
+			
 		gameArea.context.closePath();
 		
 
@@ -138,6 +134,31 @@ function drawFiveBallAtBelow(){
 		gameArea.context.fillText( throwBallNumber - i , centerX , ballToThrowY + 1);
 		gameArea.context.restore();		
 	}
+}
+
+function calculatePixelRatio() {
+    var ctx = document.createElement("canvas").getContext("2d"),
+        dpr = window.devicePixelRatio || 1,
+        bsr = ctx.webkitBackingStorePixelRatio ||
+              ctx.mozBackingStorePixelRatio ||
+              ctx.msBackingStorePixelRatio ||
+              ctx.oBackingStorePixelRatio ||
+              ctx.backingStorePixelRatio || 1;
+
+    return dpr / bsr;
+}
+
+
+function createHiDPICanvas(w, h, ratio) {
+    var PIXEL_RATIO = calculatePixelRatio();
+    if (!ratio) { ratio = PIXEL_RATIO; }
+    var can = document.createElement("canvas");
+    can.width = w * ratio;
+    can.height = h * ratio;
+    can.style.width = w + "px";
+    can.style.height = h + "px";
+    can.getContext("2d").setTransform(ratio, 0, 0, ratio, 0, 0);
+    return can;
 }
 
 
