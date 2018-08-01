@@ -9,11 +9,14 @@ var _headCircleRadius=11;
 var _angle=0;
 var throwBallNumber=10;
 var _obestacles= [];
-var _rotateSpeed=0.002;
+var _rotateSpeed=0.01;
+var dlt = -50; // speed
 var _animation=0;
 var centerX = _gameWidth / 2;
 var centerY = _gameHeight / 2;
 var _userThrowedColor="red";
+var throwAudio = new Audio('./assets/throw.mp3');
+var lostAudio = new Audio('./assets/lost.mp3');
 
 var gameArea = {
     canvas: createHiDPICanvas(_gameWidth, _gameHeight),
@@ -167,7 +170,7 @@ function drawObestacles(){
 		gameArea.context.restore();
 	}	
 }
-var dlt = -2;
+
 function changeObestaclesPos(){
 	var angle=0;
 	for( var i=0 ; i < _obestacles.length ; i++ ){
@@ -213,13 +216,24 @@ function drawThrowingBallAtBelow(){
 		gameArea.context.restore();		
 	}
 }
-
+var a,b,lineDistance;
 function collisionDetection(newBall) {
+	console.clear();
 	for( var i=0 ; i < _obestacles.length-1 ; i++ ){
-		if((_obestacles[i].x + _headCircleRadius * 2 > newBall.x && newBall.x > _obestacles[i].x-_headCircleRadius * 2) && 
+		a = ( _obestacles[i].x > newBall.x ) ? _obestacles[i].x - newBall.x : newBall.x - _obestacles[i].x;
+		b = ( _obestacles[i].y > newBall.y ) ? _obestacles[i].y - newBall.y : newBall.y - _obestacles[i].y;
+		lineDistance = Math.sqrt( a*a + b*b );
+		console.log(lineDistance);
+		console.log("x1: " + _obestacles[i].x);
+		console.log("y1: " + _obestacles[i].y);
+		console.log("x2: " + newBall.x);
+		console.log("y2: " + newBall.y );
+		if(lineDistance < (_headCircleRadius * 2)){console.log("test");return i;}
+
+		/*if((_obestacles[i].x + _headCircleRadius * 2 > newBall.x && newBall.x > _obestacles[i].x-_headCircleRadius * 2) && 
 		   (_obestacles[i].y + _headCircleRadius * 2 > newBall.y && newBall.y > _obestacles[i].y-_headCircleRadius * 2) ){
 			return i;
-		}	
+		}*/	
 	}
 	
 	return false;
@@ -232,11 +246,13 @@ function handleEnd(){
 		throwBallNumber--;
 		addedBall=addThrowedBall();
 		var result=collisionDetection(addedBall);
-		if (result){
+		if (typeof result !== "boolean" && result != false){
 			GameLoopManager.stop();
 			drawEndGame( result , _obestacles.length-1 );
+			lostAudio.play();
 			return;
 		}
+		throwAudio.play();
 		
 	}
 	if(throwBallNumber == 0){ // game win
