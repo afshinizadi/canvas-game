@@ -14,7 +14,7 @@ if ( !window.requestAnimationFrame ) {
 		window.oRequestAnimationFrame ||
 		window.msRequestAnimationFrame ||
 		function( /* function FrameRequestCallback */ callback, /* DOMElement Element */ element ) {
-			window.setTimeout( callback, 1000 / 8 );
+			window.setTimeout( callback, 1000 / 60 );
 		};
 	} )();
 }
