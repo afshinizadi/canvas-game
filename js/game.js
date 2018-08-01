@@ -52,23 +52,11 @@ gameArea.start();
 
 
 function initGame(){
-	/*gameArea.context.beginPath();
-	gameArea.context.arc(centerX, centerY, _mainCircleRadius, 0, 2 * Math.PI);
-	gameArea.context.fillStyle = 'white';
-	gameArea.context.fill();
-	gameArea.context.closePath();
-	gameArea.context.font = "30px Arial";
-	gameArea.context.fillText("0",centerX,centerY);*/
 	createObestacles();
 }
 
 
 
-
-
-
-//var x=0;
-//var y=0;
 function GameTick(elapsed)
 {
     	drawGame();
@@ -107,12 +95,8 @@ function addThrowedBall(){
 		gameArea.context.closePath();
 
 		gameArea.context.save();
-			
 			gameArea.context.beginPath();
-				
-					gameArea.context.fillStyle = 'white';
-				
-			
+				gameArea.context.fillStyle = 'white';
 				gameArea.context.arc(x,y, _headCircleRadius, 0, 2 * Math.PI);
 				gameArea.context.fill();
 			gameArea.context.closePath();
@@ -162,7 +146,6 @@ function drawObestacles(){
 	gameArea.context.strokeStyle = 'white';
 	gameArea.context.font = "12px Arial";
 	for( var i = 0 ; i < _obestacles.length ; i++ ){
-		//console.log(_obestacles[i].x);
 		gameArea.context.beginPath();
 			gameArea.context.moveTo(centerX,centerY);
 			gameArea.context.lineTo(_obestacles[i].x,_obestacles[i].y);
@@ -172,8 +155,6 @@ function drawObestacles(){
 		gameArea.context.closePath();
 
 		gameArea.context.save();
-			//gameArea.context.shadowBlur=20;
-			//gameArea.context.shadowColor="white";
 			gameArea.context.beginPath();
 				if (_obestacles[i].user_throwed){
 					gameArea.context.fillStyle = 'white';
@@ -188,19 +169,11 @@ function drawObestacles(){
 }
 var dlt = -2;
 function changeObestaclesPos(){
-	/*_angle += dlt;
-	if (_angle < -360 || _angle > 0) _angle=0;
-	_angle *= Math.PI / 180;*/
 	var angle=0;
 	for( var i=0 ; i < _obestacles.length ; i++ ){
 		_obestacles[i].angle = _obestacles[i].angle + _rotateSpeed;
-		
-		
-		
-		//console.log(angle);
-		 
-		 _obestacles[i].x = centerX + ( ( _mainCircleRadius + ( _headCircleRadius / 2 ) + _lineHeight ) * Math.cos(_obestacles[i].angle ) );
-		 _obestacles[i].y = centerY + ( ( _mainCircleRadius + ( _headCircleRadius / 2 ) + _lineHeight ) * Math.sin( _obestacles[i].angle ) );
+		_obestacles[i].x = centerX + ( ( _mainCircleRadius + ( _headCircleRadius / 2 ) + _lineHeight ) * Math.cos(_obestacles[i].angle ) );
+		_obestacles[i].y = centerY + ( ( _mainCircleRadius + ( _headCircleRadius / 2 ) + _lineHeight ) * Math.sin( _obestacles[i].angle ) );
 	}
 }
 
@@ -218,20 +191,11 @@ function drawThrowingBallAtBelow(){
 		gameArea.context.save();
 		ballToThrowY += ( _headCircleRadius * 3 );
 		gameArea.context.beginPath();
-		//gameArea.context.shadowBlur=20;
-		//gameArea.context.shadowColor="white";
 		gameArea.context.fillStyle = 'white';
-			
-			/*if(i==0){
-				gameArea.context.fillStyle = 'white';
-			}*/
 			gameArea.context.arc(centerX, ballToThrowY + bottomBallAnimateY, _headCircleRadius, 0, 2 * Math.PI);
 			if(i==0){
-				//gameArea.context.shadowBlur=60;
-				//gameArea.context.shadowColor="white";
-				
 				gameArea.context.lineWidth = 5;
-				 gameArea.context.strokeStyle = 'black';
+				gameArea.context.strokeStyle = 'black';
 				gameArea.context.stroke();
 				gameArea.context.fillStyle = 'white';
 			}
@@ -282,6 +246,7 @@ function handleEnd(){
 }
 
 function drawEndGame(obestacle1,obestacle2){
+	gameArea.clear();
 	gameArea.context.strokeStyle = 'white';
 	gameArea.context.font = "12px Arial";
 	for( var i = 0 ; i < _obestacles.length ; i++ ){
