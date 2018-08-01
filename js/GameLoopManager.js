@@ -47,7 +47,7 @@ var GameLoopManager = new function() {
 				if (elapsed > 1000) // Cap max elapsed time to 1 second to avoid death spiral
 					elapsed = 1000;
 				// Hackish fps smoothing
-				var smoothElapsed = (elapsed + this.prevElapsed + this.prevElapsed2)/3;
+				var smoothElapsed = (elapsed + this.prevElapsed + this.prevElapsed2)/2;
 				this.gameTick(0.001*smoothElapsed);
 				this.prevElapsed2 = this.prevElapsed;
 				this.prevElapsed = elapsed;

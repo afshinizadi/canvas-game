@@ -1,5 +1,4 @@
-
-
+"use strict";
 var _gameWidth =window.innerWidth;
 var _gameHeight = window.innerHeight;
 var _marginTop=0;
@@ -7,25 +6,34 @@ var _lineHeight=80;
 var _mainCircleRadius = 50;
 var _headCircleRadius=11;
 var _angle=0;
-var throwBallNumber=10;
+var throwBallNumber=30;
 var _obestacles= [];
-var _rotateSpeed=0.01;
-var dlt = -50; // speed
+var _rotateSpeed=0.015;
 var _animation=0;
 var centerX = _gameWidth / 2;
 var centerY = _gameHeight / 2;
 var _userThrowedColor="red";
 var throwAudio = new Audio('./assets/throw.mp3');
 var lostAudio = new Audio('./assets/lost.mp3');
+var x,y,angle,i=0;
+var fps = 50;
+var stop=false;
+var addedBall;
+var throwAngle=0.5 * Math.PI,
+    throwX=(centerX + ( ( _mainCircleRadius + ( _headCircleRadius / 2 ) + _lineHeight ) * Math.cos( throwAngle ) )).toFixed(1),
+    throwY=(centerY + ( ( _mainCircleRadius + ( _headCircleRadius / 2 ) + _lineHeight ) * Math.sin( throwAngle ) )).toFixed(1);
+
+var fpsInterval, startTime, now, then, elapsed;
+var rotation = 0;
 
 var gameArea = {
     canvas: createHiDPICanvas(_gameWidth, _gameHeight),
     start : function() {
 		this.canvas.id='canvas';
 		if ("ontouchstart" in document.documentElement){
-			this.canvas.addEventListener("touchend", handleEnd, false);
+			this.canvas.addEventListener("touchstart", handleEnd, false);
 		}else{
-			this.canvas.addEventListener("mouseup", handleEnd, false);
+			this.canvas.addEventListener("mousedown", handleEnd, false);
 		}
 		document.getElementById('canvas-holder').appendChild(this.canvas);
 		this.context = this.canvas.getContext("2d",{ alpha: false });
@@ -33,10 +41,13 @@ var gameArea = {
 		gameArea.context.textBaseline="middle";
 		initGame();
 		
-		GameLoopManager.run(GameTick);
+		//GameLoopManager.run(GameTick);
+		startAnimating(fps);
+		//renderGameByFps();
 		
         },
     clear : function() {
+	//canvas.width = canvas.width;
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 }
@@ -66,27 +77,53 @@ function GameTick(elapsed)
 }
 
 
+function rotateTest() {
 
+	//gameArea.context.save();
+	gameArea.context.setTransform(0, 0, 0, 0, gameArea.canvas.width/2, gameArea.context.canvas.height/2);
+	gameArea.context.translate( gameArea.canvas.width/2, gameArea.context.canvas.height/2 );
+	gameArea.context.rotate( rotation );
+	//gameArea.context.translate( -gameArea.canvas.width/2, -gameArea.context.canvas.height/2 );
+	//gameArea.context.drawImage( myImageOrCanvas, 0, 0 );
+	//gameArea.context.restore();
+    // reset transforms before clearing
+    //gameArea.context.setTransform(1, 0, 0, 1, 0, 0);
+    //gameArea.context.clearRect(0, 0, canvas.width, canvas.height);
+
+    // tramslate and rotate an absolute rotation value
+   // gameArea.context.translate(gameArea.canvas.width/2, gameArea.canvas.height/2);
+    //gameArea.context.rotate(rotation);
+
+
+
+
+    // update rotation value and request new frame
+    rotation += 0.04;
+
+    //requestAnimationFrame(draw)
+}
 function drawGame(){
 	gameArea.clear();
 	drawCenterCircle();
 	drawObestacles();
 	
-	changeObestaclesPos();
+	//changeObestaclesPos();
 	drawThrowingBallAtBelow();
    	drawLevel();
 	_animation+=_rotateSpeed;
 }
 
 function addThrowedBall(){
-	var angle = 0.5 * Math.PI ;//+ _animation;
-	var x = centerX + ( ( _mainCircleRadius + ( _headCircleRadius / 2 ) + _lineHeight ) * Math.cos( angle ) );
-	var y = centerY + ( ( _mainCircleRadius + ( _headCircleRadius / 2 ) + _lineHeight ) * Math.sin( angle ) );
+	//angle = 0.5 * Math.PI ;//+ _animation;
+	x = throwX;//(centerX + ( ( _mainCircleRadius + ( _headCircleRadius / 2 ) + _lineHeight ) * Math.cos( angle ) )).toFixed(2);
+	y = throwY;//(centerY + ( ( _mainCircleRadius + ( _headCircleRadius / 2 ) + _lineHeight ) * Math.sin( angle ) )).toFixed(2);
+	//console.log();
+	//console.log(y);
 	_obestacles[_obestacles.length]={
 		"x" : x,
 		"y" : y,
-		"angle" : angle,
-		"user_throwed": true
+		"angle" : throwAngle,
+		"user_throwed": 1
 	}
 
 	gameArea.context.beginPath();
@@ -125,20 +162,20 @@ function drawLevel(color="black"){
 
 
 function createObestacles(){
-	for(var i=0;i<10; i++)
+	for(i=0;i<10; i++)
 	{		
 		// calculating end point of a circle with the center of x and y
 		// x = xStartPoint + ( radius * cos(angle) )
 		// y = yStartPoint + (radius * sin(angle) )
 		_angle = i/(10/2) * Math.PI;//+ _animation;
-		var x = centerX + ( ( _mainCircleRadius + ( _headCircleRadius / 2 ) + _lineHeight ) * Math.cos( _angle ) );
-		var y = centerY + ( ( _mainCircleRadius + ( _headCircleRadius / 2 ) + _lineHeight ) * Math.sin( _angle ) );
+		x = (centerX + ( ( _mainCircleRadius + ( _headCircleRadius / 2 ) + _lineHeight ) * Math.cos( _angle ) )).toFixed(1);
+		y = (centerY + ( ( _mainCircleRadius + ( _headCircleRadius / 2 ) + _lineHeight ) * Math.sin( _angle ) )).toFixed(1);
 		
 		_obestacles[i] = {
 			"x": x,
 			"y": y,	
 			"angle": _angle,
-			"user_throwed": false	
+			"user_throwed": 0	
 		}
 	
 	}
@@ -148,7 +185,7 @@ function createObestacles(){
 function drawObestacles(){
 	gameArea.context.strokeStyle = 'white';
 	gameArea.context.font = "12px Arial";
-	for( var i = 0 ; i < _obestacles.length ; i++ ){
+	for(i = 0 ; i < _obestacles.length ; i++ ){
 		gameArea.context.beginPath();
 			gameArea.context.moveTo(centerX,centerY);
 			gameArea.context.lineTo(_obestacles[i].x,_obestacles[i].y);
@@ -172,36 +209,29 @@ function drawObestacles(){
 }
 
 function changeObestaclesPos(){
-	var angle=0;
-	for( var i=0 ; i < _obestacles.length ; i++ ){
+	//angle=0;
+	for( i=0 ; i < _obestacles.length ; i++ ){
 		_obestacles[i].angle = _obestacles[i].angle + _rotateSpeed;
-		_obestacles[i].x = centerX + ( ( _mainCircleRadius + ( _headCircleRadius / 2 ) + _lineHeight ) * Math.cos(_obestacles[i].angle ) );
-		_obestacles[i].y = centerY + ( ( _mainCircleRadius + ( _headCircleRadius / 2 ) + _lineHeight ) * Math.sin( _obestacles[i].angle ) );
+		_obestacles[i].x = (centerX + ( ( _mainCircleRadius + ( _headCircleRadius / 2 ) + _lineHeight ) * Math.cos(_obestacles[i].angle ) )).toFixed(1);
+		_obestacles[i].y = (centerY + ( ( _mainCircleRadius + ( _headCircleRadius / 2 ) + _lineHeight ) * Math.sin( _obestacles[i].angle ) )).toFixed(1);
 	}
 }
 
 
-var bottomBallAnimateY=0;
+var bottomBallAnimateY=0,distance=0,ballToThrowY,ballMarginTop=( _headCircleRadius * 3 );
 function drawThrowingBallAtBelow(){
-	var distance=0;
 	if (bottomBallAnimateY > 0 ){
 		bottomBallAnimateY -= 5;
 	}
-	var ballToThrowY = centerY + _lineHeight + _marginTop + _headCircleRadius * 6;
+	ballToThrowY = centerY + _lineHeight + _marginTop + _headCircleRadius * 6;
 	gameArea.context.font = "bold 12px Arial";
 	
-	for( var i = 0 ; i < throwBallNumber ; i++ ){
+	for( i = 0 ; i < throwBallNumber ; i++ ){
 		gameArea.context.save();
-		ballToThrowY += ( _headCircleRadius * 3 );
+		ballToThrowY += ballMarginTop;
 		gameArea.context.beginPath();
 		gameArea.context.fillStyle = 'white';
 			gameArea.context.arc(centerX, ballToThrowY + bottomBallAnimateY, _headCircleRadius, 0, 2 * Math.PI);
-			if(i==0){
-				gameArea.context.lineWidth = 5;
-				gameArea.context.strokeStyle = 'black';
-				gameArea.context.stroke();
-				gameArea.context.fillStyle = 'white';
-			}
 			gameArea.context.fill();
 			
 			
@@ -218,46 +248,37 @@ function drawThrowingBallAtBelow(){
 }
 var a,b,lineDistance;
 function collisionDetection(newBall) {
-	console.clear();
-	for( var i=0 ; i < _obestacles.length-1 ; i++ ){
+	for( i=0 ; i < _obestacles.length-1 ; i++ ){
 		a = ( _obestacles[i].x > newBall.x ) ? _obestacles[i].x - newBall.x : newBall.x - _obestacles[i].x;
 		b = ( _obestacles[i].y > newBall.y ) ? _obestacles[i].y - newBall.y : newBall.y - _obestacles[i].y;
-		lineDistance = Math.sqrt( a*a + b*b );
-		console.log(lineDistance);
-		console.log("x1: " + _obestacles[i].x);
-		console.log("y1: " + _obestacles[i].y);
-		console.log("x2: " + newBall.x);
-		console.log("y2: " + newBall.y );
-		if(lineDistance < (_headCircleRadius * 2)){console.log("test");return i;}
-
-		/*if((_obestacles[i].x + _headCircleRadius * 2 > newBall.x && newBall.x > _obestacles[i].x-_headCircleRadius * 2) && 
-		   (_obestacles[i].y + _headCircleRadius * 2 > newBall.y && newBall.y > _obestacles[i].y-_headCircleRadius * 2) ){
-			return i;
-		}*/	
+		lineDistance = Math.floor(Math.sqrt( a*a + b*b ));
+		
+		if(lineDistance < (_headCircleRadius * 2)){return i+1;}	
 	}
-	
-	return false;
+	return 0;
 }
-
+var result;
 function handleEnd(){
 	bottomBallAnimateY=_headCircleRadius * 3;
 	
 	if(throwBallNumber > 0){
 		throwBallNumber--;
 		addedBall=addThrowedBall();
-		var result=collisionDetection(addedBall);
-		if (typeof result !== "boolean" && result != false){
-			GameLoopManager.stop();
-			drawEndGame( result , _obestacles.length-1 );
+		result=collisionDetection(addedBall);
+		if (result){
+			//GameLoopManager.stop();
+			drawEndGame( result-1 , _obestacles.length-1 );
+			stop=true;
 			lostAudio.play();
 			return;
 		}
-		throwAudio.play();
 		
-	}
-	if(throwBallNumber == 0){ // game win
+		throwAudio.play();
+		if(throwBallNumber == 0){ // game win
 			alert("gameWin"); 
+		}
 	}
+	
 	
 }
 
@@ -265,7 +286,7 @@ function drawEndGame(obestacle1,obestacle2){
 	gameArea.clear();
 	gameArea.context.strokeStyle = 'white';
 	gameArea.context.font = "12px Arial";
-	for( var i = 0 ; i < _obestacles.length ; i++ ){
+	for( i = 0 ; i < _obestacles.length ; i++ ){
 		gameArea.context.beginPath();
 			gameArea.context.moveTo(centerX,centerY);
 			gameArea.context.lineTo(_obestacles[i].x,_obestacles[i].y);
@@ -299,7 +320,7 @@ function drawEndGame(obestacle1,obestacle2){
 
 // finding the ration of the device
 function calculatePixelRatio() {
-    var ctx = document.createElement("canvas").getContext("2d"),
+    var ctx = document.createElement("canvas").getContext("2d",{ alpha: false }),
         dpr = window.devicePixelRatio || 1,
         bsr = ctx.webkitBackingStorePixelRatio ||
               ctx.mozBackingStorePixelRatio ||
@@ -313,7 +334,9 @@ function calculatePixelRatio() {
 // create element with the ration of the device
 function createHiDPICanvas(w, h, ratio) {
     var PIXEL_RATIO = calculatePixelRatio();
+    if(PIXEL_RATIO > 1 ) PIXEL_RATIO *= 0.7;
     if (!ratio) { ratio = PIXEL_RATIO; }
+	
     var can = document.createElement("canvas");
     can.width = w * ratio;
     can.height = h * ratio;
@@ -321,6 +344,39 @@ function createHiDPICanvas(w, h, ratio) {
     can.style.height = h + "px";
     can.getContext("2d").setTransform(ratio, 0, 0, ratio, 0, 0);
     return can;
+}
+
+function startAnimating(fps) {
+    fpsInterval = 1000 / fps;
+    then = Date.now();
+    startTime = then;
+    animate();
+}
+function animate() {
+
+    // request another frame
+	if(!stop){
+    	  requestAnimationFrame(animate);
+	
+
+	    // calc elapsed time since last loop
+
+	    now = Date.now();
+	    elapsed = now - then;
+
+	    // if enough time has elapsed, draw the next frame
+
+	    if (elapsed > fpsInterval) {
+
+		// Get ready for next frame by setting then=now, but also adjust for your
+		// specified fpsInterval not being a multiple of RAF's interval (16.7ms)
+		then = now - (elapsed % fpsInterval);
+
+		drawGame();
+		rotateTest();
+
+	    }
+   	}
 }
 
 
