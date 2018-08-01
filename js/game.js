@@ -28,7 +28,7 @@ var gameArea = {
 			this.canvas.addEventListener("mouseup", handleEnd, false);
 		}
 		document.getElementById('canvas-holder').appendChild(this.canvas);
-		this.context = this.canvas.getContext("2d");
+		this.context = this.canvas.getContext("2d",{ alpha: false });
 		gameArea.context.textAlign="center";
 		gameArea.context.textBaseline="middle";
 		initGame();
